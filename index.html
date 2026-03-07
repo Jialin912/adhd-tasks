@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ 每日任务板</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="任务板">
+<meta name="theme-color" content="#1a1a2e">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -225,6 +231,22 @@
     <div class="calendar-section">
       <div class="section-title">📅 打卡记录（点击查看当天详情）</div>
       <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <div class="calendar-section" style="margin-top:16px;">
+      <div class="section-title">⏰ 每日提醒时间</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="color:var(--text2);font-size:0.9rem;font-weight:700;">到这个时间还没打卡就提醒你：</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="number" id="reminderHour" min="0" max="23"
+            style="width:70px;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.15);border-radius:10px;padding:8px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:800;outline:none;text-align:center;"/>
+          <span style="font-size:1.2rem;font-weight:800;color:var(--text2);">:</span>
+          <input type="number" id="reminderMin" min="0" max="59"
+            style="width:70px;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.15);border-radius:10px;padding:8px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:800;outline:none;text-align:center;"/>
+          <button onclick="saveReminderTime()" style="font-family:'Fredoka One',cursive;font-size:0.95rem;padding:8px 18px;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,var(--c6),var(--c4));color:white;box-shadow:0 4px 16px rgba(162,155,254,0.3);">保存</button>
+        </div>
+        <div id="reminderSaved" style="display:none;font-size:0.85rem;color:var(--c7);font-weight:700;">✅ 已保存！</div>
+      </div>
     </div>
   </div>
 </div>
@@ -615,9 +637,42 @@ function showNotif(title,msg){
   clearTimeout(window._nt);window._nt=setTimeout(closeNotif,5000);
 }
 function closeNotif(){document.getElementById('notif').style.display='none';}
+function getReminderTime(){
+  const h=parseInt(localStorage.getItem('reminder_hour')||'20');
+  const m=parseInt(localStorage.getItem('reminder_min')||'0');
+  return {h,m};
+}
+function loadReminderInputs(){
+  const {h,m}=getReminderTime();
+  document.getElementById('reminderHour').value=h;
+  document.getElementById('reminderMin').value=String(m).padStart(2,'0');
+}
+function saveReminderTime(){
+  const h=Math.max(0,Math.min(23,parseInt(document.getElementById('reminderHour').value)||20));
+  const m=Math.max(0,Math.min(59,parseInt(document.getElementById('reminderMin').value)||0));
+  localStorage.setItem('reminder_hour',h);
+  localStorage.setItem('reminder_min',m);
+  document.getElementById('reminderHour').value=h;
+  document.getElementById('reminderMin').value=String(m).padStart(2,'0');
+  const saved=document.getElementById('reminderSaved');
+  saved.style.display='block';
+  setTimeout(()=>saved.style.display='none',2000);
+}
 function scheduleReminder(){
-  setInterval(()=>{const now=new Date();if(now.getHours()>=20&&!checkinDates.has(getToday()))showNotif('🦉 提醒！','今天还没打卡哦！');},60000);
-  const now=new Date();if(now.getHours()>=20&&!checkinDates.has(getToday()))setTimeout(()=>showNotif('🦉 提醒！','今天还没打卡哦！'),3000);
+  loadReminderInputs();
+  setInterval(()=>{
+    const now=new Date();
+    const {h,m}=getReminderTime();
+    const nowMins=now.getHours()*60+now.getMinutes();
+    const targetMins=h*60+m;
+    if(nowMins>=targetMins&&!checkinDates.has(getToday()))
+      showNotif('🦉 提醒！',`今天还没打卡哦！（提醒时间 ${h}:${String(m).padStart(2,'0')}）`);
+  },60000);
+  const now=new Date();
+  const {h,m}=getReminderTime();
+  const nowMins=now.getHours()*60+now.getMinutes();
+  if(nowMins>=h*60+m&&!checkinDates.has(getToday()))
+    setTimeout(()=>showNotif('🦉 提醒！',`今天还没打卡哦！`),3000);
 }
 
 // CONFETTI
@@ -633,6 +688,15 @@ function spawnBursts(emojis){
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeNotif();closeHistory();closeDay();}});
 init();
+
+// Register Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(e => console.log('SW error:', e));
+  });
+}
 </script>
 </body>
 </html>
