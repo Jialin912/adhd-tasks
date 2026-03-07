@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ 每日任务板 Daily Tasks</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #FF6B9D; --c2: #FF9F43; --c3: #FECA57; --c4: #48DBFB;
+    --c5: #FF6B6B; --c6: #A29BFE; --c7: #55EFC4; --c8: #FD79A8;
+    --bg: #1a1a2e; --bg2: #16213e; --bg3: #0f3460;
+    --text: #f8f9fa; --text2: #adb5bd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(162,155,254,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(255,107,157,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 60% 80%, rgba(72,219,251,0.12) 0%, transparent 60%);
+    animation: bgShift 8s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes bgShift {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; transform: scale(1.05); }
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 860px; margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    background: linear-gradient(135deg, var(--c1), var(--c3), var(--c4));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+    animation: titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes titlePop {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .header .subtitle {
+    font-size: 1rem; color: var(--text2);
+    margin-top: 6px; font-weight: 600;
+  }
+
+  /* ===== DATE & STREAK BAR ===== */
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 14px 24px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(10px);
+    gap: 16px; flex-wrap: wrap;
+  }
+  .date-display {
+    font-size: 1rem; font-weight: 700;
+    color: var(--c3);
+  }
+  .streak-section {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .streak-flame {
+    font-size: 1.6rem;
+    animation: flamePulse 1.5s ease-in-out infinite;
+  }
+  @keyframes flamePulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.2) rotate(-5deg); }
+  }
+  .streak-count {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--c2), var(--c3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .streak-label { font-size: 0.85rem; color: var(--text2); font-weight: 700; }
+
+  .checkin-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 0.9rem;
+    padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer;
+    background: linear-gradient(135deg, var(--c1), var(--c6));
+    color: white;
+    box-shadow: 0 4px 20px rgba(255,107,157,0.4);
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .checkin-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,107,157,0.5); }
+  .checkin-btn:active { transform: scale(0.96); }
+  .checkin-btn.done {
+    background: linear-gradient(135deg, var(--c7), #00b894);
+    box-shadow: 0 4px 20px rgba(85,239,196,0.4);
+    pointer-events: none;
+  }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 0.88rem; font-weight: 700; color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .progress-meta span:last-child { color: var(--c3); }
+  .progress-track {
+    height: 14px; border-radius: 99px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--c1), var(--c3), var(--c4));
+    transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute; right: 0; top: 0; bottom: 0; width: 30px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+  /* ===== ADD TASK ===== */
+  .add-section {
+    display: flex; gap: 10px; margin-bottom: 30px;
+  }
+  .task-input {
+    flex: 1;
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600;
+    background: rgba(255,255,255,0.07);
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 14px; padding: 12px 18px;
+    color: var(--text); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .task-input::placeholder { color: var(--text2); }
+  .task-input:focus {
+    border-color: var(--c6);
+    box-shadow: 0 0 0 4px rgba(162,155,254,0.2);
+  }
+  .add-btn {
+    font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+    padding: 12px 22px; border: none; border-radius: 14px; cursor: pointer;
+    background: linear-gradient(135deg, var(--c6), var(--c4));
+    color: white;
+    box-shadow: 0 4px 20px rgba(162,155,254,0.35);
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .add-btn:hover { transform: translateY(-2px) scale(1.03); }
+  .add-btn:active { transform: scale(0.95); }
+
+  /* ===== TASK GRID ===== */
+  .tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .task-card {
+    border-radius: 20px; padding: 20px 16px;
+    cursor: pointer; position: relative; overflow: hidden;
+    border: 2px solid transparent;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    min-height: 130px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: scale(0.7) rotate(-3deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+  .task-card:hover { transform: translateY(-4px) scale(1.02); }
+  .task-card:active { transform: scale(0.97); }
+
+  /* Color variants */
+  .task-card.color-0 { border-color: rgba(255,107,157,0.4); --card-accent: var(--c1); }
+  .task-card.color-1 { border-color: rgba(255,159,67,0.4); --card-accent: var(--c2); }
+  .task-card.color-2 { border-color: rgba(254,202,87,0.4); --card-accent: var(--c3); }
+  .task-card.color-3 { border-color: rgba(72,219,251,0.4); --card-accent: var(--c4); }
+  .task-card.color-4 { border-color: rgba(255,107,107,0.4); --card-accent: var(--c5); }
+  .task-card.color-5 { border-color: rgba(162,155,254,0.4); --card-accent: var(--c6); }
+  .task-card.color-6 { border-color: rgba(85,239,196,0.4); --card-accent: var(--c7); }
+  .task-card.color-7 { border-color: rgba(253,121,168,0.4); --card-accent: var(--c8); }
+
+  .task-card::before {
+    content: ''; position: absolute; inset: 0; opacity: 0;
+    background: radial-gradient(circle at 30% 30%, var(--card-accent, var(--c1)), transparent 70%);
+    transition: opacity 0.3s;
+  }
+  .task-card.done::before { opacity: 0.2; }
+
+  .task-card.done {
+    border-width: 2px;
+    border-style: solid;
+  }
+  .task-card.color-0.done { border-color: var(--c1); background: rgba(255,107,157,0.15); }
+  .task-card.color-1.done { border-color: var(--c2); background: rgba(255,159,67,0.15); }
+  .task-card.color-2.done { border-color: var(--c3); background: rgba(254,202,87,0.15); }
+  .task-card.color-3.done { border-color: var(--c4); background: rgba(72,219,251,0.15); }
+  .task-card.color-4.done { border-color: var(--c5); background: rgba(255,107,107,0.15); }
+  .task-card.color-5.done { border-color: var(--c6); background: rgba(162,155,254,0.15); }
+  .task-card.color-6.done { border-color: var(--c7); background: rgba(85,239,196,0.15); }
+  .task-card.color-7.done { border-color: var(--c8); background: rgba(253,121,168,0.15); }
+
+  .card-emoji { font-size: 1.8rem; margin-bottom: 8px; }
+  .card-text {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem; font-weight: 600;
+    line-height: 1.3; flex: 1;
+    word-break: break-word;
+  }
+  .task-card.done .card-text {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+  .card-check {
+    font-size: 1.4rem; margin-top: 10px;
+    display: flex; justify-content: flex-end;
+  }
+  .delete-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(255,255,255,0.1); border: none; border-radius: 50%;
+    width: 24px; height: 24px; cursor: pointer; font-size: 0.7rem;
+    color: var(--text2); display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .task-card:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { background: rgba(255,107,107,0.4); color: white; }
+
+  /* Completion burst */
+  .burst {
+    position: fixed; pointer-events: none; z-index: 999;
+    font-size: 1.5rem;
+    animation: burstAnim 0.8s ease-out forwards;
+  }
+  @keyframes burstAnim {
+    0% { opacity: 1; transform: scale(0.5) translateY(0); }
+    100% { opacity: 0; transform: scale(1.5) translateY(-60px); }
+  }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    grid-column: 1/-1;
+  }
+  .empty-state .icon { font-size: 4rem; margin-bottom: 16px; }
+  .empty-state p { color: var(--text2); font-size: 1.1rem; font-weight: 600; }
+
+  /* ===== STREAK CALENDAR ===== */
+  .calendar-section {
+    margin-top: 36px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 24px;
+  }
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem; margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--c3), var(--c2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .cal-grid {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .cal-day {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800;
+    background: rgba(255,255,255,0.06);
+    color: var(--text2); position: relative;
+    transition: all 0.2s;
+  }
+  .cal-day.checked {
+    background: linear-gradient(135deg, var(--c2), var(--c1));
+    color: white;
+    box-shadow: 0 2px 10px rgba(255,107,157,0.4);
+  }
+  .cal-day.today {
+    border: 2px solid var(--c4);
+    color: var(--c4);
+  }
+  .cal-day.checked.today {
+    border: 2px solid var(--c3);
+  }
+
+  /* ===== NOTIFICATION BANNER ===== */
+  .notif {
+    position: fixed; bottom: 24px; right: 24px; left: 24px;
+    max-width: 400px; margin-left: auto;
+    background: linear-gradient(135deg, var(--bg3), var(--bg2));
+    border: 2px solid var(--c1);
+    border-radius: 20px; padding: 16px 20px;
+    z-index: 100; animation: slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 8px 32px rgba(255,107,157,0.3);
+    display: flex; align-items: center; gap: 12px;
+  }
+  @keyframes slideUp {
+    from { opacity:0; transform: translateY(60px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+  .notif-icon { font-size: 2rem; }
+  .notif-text strong { display: block; font-size: 1rem; color: var(--c1); margin-bottom: 2px; }
+  .notif-text span { font-size: 0.85rem; color: var(--text2); }
+  .notif-close {
+    margin-left: auto; background: none; border: none; cursor: pointer;
+    font-size: 1.2rem; color: var(--text2);
+  }
+
+  /* ===== ALL DONE BANNER ===== */
+  .all-done {
+    text-align: center; padding: 20px;
+    background: linear-gradient(135deg, rgba(85,239,196,0.1), rgba(72,219,251,0.1));
+    border: 2px solid var(--c7);
+    border-radius: 20px; margin-top: 24px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes bounceIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* ===== CATEGORY TAGS ===== */
+  .emoji-picker {
+    display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .emoji-opt {
+    font-size: 1.4rem; cursor: pointer; padding: 4px;
+    border-radius: 8px; transition: transform 0.2s, background 0.2s;
+    background: transparent; border: 2px solid transparent;
+  }
+  .emoji-opt:hover { transform: scale(1.3); }
+  .emoji-opt.selected { background: rgba(255,255,255,0.12); border-color: var(--c6); }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .tasks-grid { grid-template-columns: repeat(2, 1fr); }
+    .add-section { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>✨ 我的每日任务板</h1>
+    <p class="subtitle">一步一步来，你已经很棒了 🌈</p>
+  </div>
+
+  <!-- Top Bar: Date + Streak + Check-in -->
+  <div class="top-bar">
+    <div class="date-display" id="dateDisplay"></div>
+    <div class="streak-section">
+      <div class="streak-flame">🔥</div>
+      <div class="streak-count" id="streakCount">0</div>
+      <div class="streak-label">天连续打卡<br>DAY STREAK</div>
+    </div>
+    <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">📅 今日打卡</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span>今日进度 Progress</span>
+      <span id="progressText">0 / 0</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Add Task -->
+  <div class="emoji-picker" id="emojiPicker"></div>
+  <div class="add-section">
+    <input class="task-input" id="taskInput" placeholder="添加新任务… Add a new task" maxlength="40"
+      onkeydown="if(event.key==='Enter')addTask()"/>
+    <button class="add-btn" onclick="addTask()">＋ 添加</button>
+  </div>
+
+  <!-- Task Grid -->
+  <div class="tasks-grid" id="tasksGrid"></div>
+
+  <!-- All Done Banner -->
+  <div class="all-done" id="allDone" style="display:none">
+    🎉 全部完成！你今天太厉害了！<br>
+    <span style="font-size:1rem;font-family:'Nunito',sans-serif;font-weight:700;">All tasks done! You're amazing today!</span>
+  </div>
+
+  <!-- Streak Calendar -->
+  <div class="calendar-section">
+    <div class="section-title">📅 打卡记录 Check-in History</div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+</div>
+
+<!-- Notification -->
+<div class="notif" id="notif" style="display:none">
+  <div class="notif-icon">🦉</div>
+  <div class="notif-text">
+    <strong id="notifTitle"></strong>
+    <span id="notifMsg"></span>
+  </div>
+  <button class="notif-close" onclick="closeNotif()">✕</button>
+</div>
+
+<script>
+// ===== STATE =====
+const EMOJIS = ['⭐','📚','🏃','🍎','💊','🎮','🎨','🧹','💪','🌿','📝','🛁','🎯','🎵','🧘','🌙'];
+let selectedEmoji = '⭐';
+let tasks = [];
+let checkinData = {}; // { 'YYYY-MM-DD': true }
+let streak = 0;
+
+const COLORS = 8;
+let colorIndex = 0;
+
+// ===== INIT =====
+function init() {
+  loadData();
+  renderEmojiPicker();
+  renderDate();
+  renderCalendar();
+  renderTasks();
+  updateProgress();
+  updateCheckinBtn();
+  scheduleReminder();
+}
+
+function loadData() {
+  try {
+    const t = localStorage.getItem('adhd_tasks_v2');
+    const d = localStorage.getItem('adhd_date');
+    const ci = localStorage.getItem('adhd_checkin');
+    
+    checkinData = ci ? JSON.parse(ci) : {};
+    streak = calcStreak();
+    document.getElementById('streakCount').textContent = streak;
+
+    const today = getToday();
+    if (d !== today) {
+      // New day: reset tasks
+      tasks = t ? JSON.parse(t).map(tk => ({...tk, done: false})) : getDefaultTasks();
+      localStorage.setItem('adhd_date', today);
+    } else {
+      tasks = t ? JSON.parse(t) : getDefaultTasks();
+    }
+  } catch(e) {
+    tasks = getDefaultTasks();
+    checkinData = {};
+  }
+}
+
+function getDefaultTasks() {
+  return [
+    { id: 1, text: '喝水 Drink Water', emoji: '💧', color: 0, done: false },
+    { id: 2, text: '吃早饭 Breakfast', emoji: '🍎', color: 1, done: false },
+    { id: 3, text: '运动 Exercise', emoji: '🏃', color: 2, done: false },
+    { id: 4, text: '学习 Study', emoji: '📚', color: 3, done: false },
+  ];
+}
+
+function saveTasks() {
+  localStorage.setItem('adhd_tasks_v2', JSON.stringify(tasks));
+}
+
+function saveCheckin() {
+  localStorage.setItem('adhd_checkin', JSON.stringify(checkinData));
+}
+
+// ===== DATE =====
+function getToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function renderDate() {
+  const d = new Date();
+  const days = ['日','一','二','三','四','五','六'];
+  const months = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+  document.getElementById('dateDisplay').innerHTML = 
+    `${d.getFullYear()}年${months[d.getMonth()]}月${d.getDate()}日 &nbsp;|&nbsp; 周${days[d.getDay()]}`;
+}
+
+// ===== STREAK =====
+function calcStreak() {
+  let s = 0;
+  const d = new Date();
+  while(true) {
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (checkinData[key]) { s++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return s;
+}
+
+// ===== CHECK-IN =====
+function doCheckin() {
+  const today = getToday();
+  if (checkinData[today]) return;
+  checkinData[today] = true;
+  saveCheckin();
+  streak = calcStreak();
+  document.getElementById('streakCount').textContent = streak;
+  updateCheckinBtn();
+  renderCalendar();
+  showNotif('🎉 打卡成功！', `连续 ${streak} 天了！太棒了！You're on a ${streak}-day streak!`);
+  spawnBursts(['🎊','⭐','🔥','✨'], 400, 300);
+}
+
+function updateCheckinBtn() {
+  const btn = document.getElementById('checkinBtn');
+  if (checkinData[getToday()]) {
+    btn.textContent = '✅ 已打卡 Done!';
+    btn.classList.add('done');
+  }
+}
+
+// ===== TASKS =====
+function renderEmojiPicker() {
+  const el = document.getElementById('emojiPicker');
+  el.innerHTML = EMOJIS.map(e =>
+    `<span class="emoji-opt${e===selectedEmoji?' selected':''}" onclick="selectEmoji('${e}')">${e}</span>`
+  ).join('');
+}
+
+function selectEmoji(e) {
+  selectedEmoji = e;
+  renderEmojiPicker();
+}
+
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  tasks.push({
+    id: Date.now(),
+    text,
+    emoji: selectedEmoji,
+    color: colorIndex % COLORS,
+    done: false
+  });
+  colorIndex++;
+  input.value = '';
+  saveTasks();
+  renderTasks();
+  updateProgress();
+}
+
+function toggleTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  task.done = !task.done;
+  saveTasks();
+  renderTasks();
+  updateProgress();
+  if (task.done) {
+    spawnBursts(['✨','⭐','🌟'], 200, 200);
+    checkAllDone();
+  }
+}
+
+function deleteTask(id, e) {
+  e.stopPropagation();
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  renderTasks();
+  updateProgress();
+}
+
+function renderTasks() {
+  const grid = document.getElementById('tasksGrid');
+  if (!tasks.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="icon">🌸</div><p>还没有任务，添加一个吧！<br>No tasks yet — add one above!</p></div>`;
+    return;
+  }
+  grid.innerHTML = tasks.map((t, i) => `
+    <div class="task-card color-${t.color} ${t.done?'done':''}"
+         onclick="toggleTask(${t.id})"
+         style="animation-delay:${i*0.05}s">
+      <button class="delete-btn" onclick="deleteTask(${t.id},event)" title="删除">✕</button>
+      <div class="card-emoji">${t.emoji}</div>
+      <div class="card-text">${escHtml(t.text)}</div>
+      <div class="card-check">${t.done ? '✅' : '⬜'}</div>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateProgress() {
+  const total = tasks.length;
+  const done = tasks.filter(t => t.done).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('progressText').textContent = `${done} / ${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function checkAllDone() {
+  const total = tasks.length;
+  if (!total) return;
+  if (tasks.every(t => t.done)) {
+    document.getElementById('allDone').style.display = 'block';
+    spawnBursts(['🎉','🏆','🌈','✨','🎊'], 500, 350);
+    setTimeout(() => showNotif('🏆 全部完成！', '今天的任务全部搞定了！All done — incredible!'), 800);
+  } else {
+    document.getElementById('allDone').style.display = 'none';
+  }
+}
+
+// ===== CALENDAR =====
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  const today = getToday();
+  const d = new Date();
+  d.setDate(d.getDate() - 27); // last 28 days
+  let html = '';
+  for (let i = 0; i < 28; i++) {
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const isToday = key === today;
+    const isChecked = !!checkinData[key];
+    html += `<div class="cal-day${isChecked?' checked':''}${isToday?' today':''}" title="${key}">${d.getDate()}</div>`;
+    d.setDate(d.getDate()+1);
+  }
+  grid.innerHTML = html;
+}
+
+// ===== NOTIFICATIONS =====
+function showNotif(title, msg) {
+  document.getElementById('notifTitle').textContent = title;
+  document.getElementById('notifMsg').textContent = msg;
+  const n = document.getElementById('notif');
+  n.style.display = 'flex';
+  clearTimeout(window._notifTimer);
+  window._notifTimer = setTimeout(closeNotif, 5000);
+}
+
+function closeNotif() {
+  document.getElementById('notif').style.display = 'none';
+}
+
+function scheduleReminder() {
+  // Check every minute if it's past 20:00 and user hasn't checked in
+  setInterval(() => {
+    const now = new Date();
+    const today = getToday();
+    if (now.getHours() >= 20 && !checkinData[today]) {
+      showNotif('🦉 提醒！Reminder!', '今天还没有打卡哦，别忘了！You haven\'t checked in today!');
+    }
+  }, 60000);
+
+  // Also show on load if after 20:00 and not checked in
+  const now = new Date();
+  const today = getToday();
+  if (now.getHours() >= 20 && !checkinData[today]) {
+    setTimeout(() => showNotif('🦉 提醒！Reminder!', '今天还没有打卡哦，别忘了！You haven\'t checked in today!'), 3000);
+  }
+}
+
+// ===== CONFETTI BURSTS =====
+function spawnBursts(emojis, x, y) {
+  const count = 8;
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'burst';
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left = (Math.random()*window.innerWidth) + 'px';
+      el.style.top = (Math.random()*window.innerHeight*0.6 + 100) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 900);
+    }, i * 80);
+  }
+}
+
+// ===== KEYBOARD SHORTCUT =====
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeNotif();
+});
+
+init();
+</script>
+</body>
+</html>
