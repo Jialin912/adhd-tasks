@@ -3,79 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✨ 每日任务板 Daily Tasks</title>
+<title>✨ 每日任务板</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root {
-    --c1:#FF6B9D;--c2:#FF9F43;--c3:#FECA57;--c4:#48DBFB;
-    --c5:#FF6B6B;--c6:#A29BFE;--c7:#55EFC4;--c8:#FD79A8;
-    --bg:#1a1a2e;--bg2:#16213e;--bg3:#0f3460;
-    --text:#f8f9fa;--text2:#adb5bd;
-  }
+  :root{--c1:#FF6B9D;--c2:#FF9F43;--c3:#FECA57;--c4:#48DBFB;--c5:#FF6B6B;--c6:#A29BFE;--c7:#55EFC4;--c8:#FD79A8;--bg:#1a1a2e;--bg2:#16213e;--bg3:#0f3460;--text:#f8f9fa;--text2:#adb5bd;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-  body::before{
-    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(ellipse at 20% 50%,rgba(162,155,254,0.15) 0%,transparent 60%),
-               radial-gradient(ellipse at 80% 20%,rgba(255,107,157,0.15) 0%,transparent 60%),
-               radial-gradient(ellipse at 60% 80%,rgba(72,219,251,0.12) 0%,transparent 60%);
-    animation:bgShift 8s ease-in-out infinite alternate;
-  }
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 20% 50%,rgba(162,155,254,0.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(255,107,157,0.15) 0%,transparent 60%),radial-gradient(ellipse at 60% 80%,rgba(72,219,251,0.12) 0%,transparent 60%);animation:bgShift 8s ease-in-out infinite alternate;}
   @keyframes bgShift{0%{opacity:0.6}100%{opacity:1;transform:scale(1.05)}}
 
-  /* ===== AUTH PAGE ===== */
-  #authPage{
-    position:relative;z-index:1;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    min-height:100vh;padding:24px;
-  }
-  .auth-box{
-    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-    border-radius:28px;padding:40px 32px;width:100%;max-width:400px;
-    backdrop-filter:blur(12px);animation:fadeIn 0.5s ease;
-  }
+  /* AUTH */
+  #authPage{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+  .auth-box{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:28px;padding:40px 32px;width:100%;max-width:400px;backdrop-filter:blur(12px);animation:fadeIn 0.5s ease;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-  .auth-title{
-    font-family:'Fredoka One',cursive;font-size:2.2rem;text-align:center;
-    background:linear-gradient(135deg,var(--c1),var(--c3),var(--c4));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-    margin-bottom:6px;
-  }
+  .auth-title{font-family:'Fredoka One',cursive;font-size:2.2rem;text-align:center;background:linear-gradient(135deg,var(--c1),var(--c3),var(--c4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
   .auth-subtitle{text-align:center;color:var(--text2);font-size:0.9rem;font-weight:600;margin-bottom:28px;}
   .auth-tabs{display:flex;margin-bottom:24px;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;}
-  .auth-tab{
-    flex:1;padding:10px;border:none;background:transparent;color:var(--text2);
-    font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;
-    border-radius:10px;cursor:pointer;transition:all 0.2s;
-  }
+  .auth-tab{flex:1;padding:10px;border:none;background:transparent;color:var(--text2);font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;border-radius:10px;cursor:pointer;transition:all 0.2s;}
   .auth-tab.active{background:rgba(255,255,255,0.12);color:var(--text);}
   .auth-field{margin-bottom:16px;}
   .auth-field label{display:block;font-size:0.85rem;font-weight:700;color:var(--text2);margin-bottom:6px;}
-  .auth-input{
-    width:100%;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:600;
-    background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);
-    border-radius:12px;padding:12px 16px;color:var(--text);outline:none;
-    transition:border-color 0.2s,box-shadow 0.2s;
-  }
+  .auth-input{width:100%;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:600;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 16px;color:var(--text);outline:none;transition:border-color 0.2s;}
   .auth-input:focus{border-color:var(--c6);box-shadow:0 0 0 4px rgba(162,155,254,0.2);}
-  .auth-btn{
-    width:100%;padding:14px;border:none;border-radius:14px;cursor:pointer;
-    font-family:'Fredoka One',cursive;font-size:1.1rem;color:white;
-    background:linear-gradient(135deg,var(--c1),var(--c6));
-    box-shadow:0 4px 20px rgba(255,107,157,0.4);transition:all 0.2s;margin-top:8px;
-  }
+  .auth-btn{width:100%;padding:14px;border:none;border-radius:14px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:1.1rem;color:white;background:linear-gradient(135deg,var(--c1),var(--c6));box-shadow:0 4px 20px rgba(255,107,157,0.4);transition:all 0.2s;margin-top:8px;}
   .auth-btn:hover{transform:translateY(-2px);}
   .auth-btn:disabled{opacity:0.6;pointer-events:none;}
   .auth-error{background:rgba(255,107,107,0.15);border:1px solid rgba(255,107,107,0.4);border-radius:10px;padding:10px 14px;font-size:0.85rem;color:#ff6b6b;margin-bottom:16px;font-weight:600;}
   .auth-success{background:rgba(85,239,196,0.15);border:1px solid rgba(85,239,196,0.4);border-radius:10px;padding:10px 14px;font-size:0.85rem;color:var(--c7);margin-bottom:16px;font-weight:600;}
 
-  /* ===== MAIN APP ===== */
+  /* APP */
   #appPage{display:none;}
   .container{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:24px 16px;}
   .top-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
   .user-info{font-size:0.85rem;color:var(--text2);font-weight:700;}
   .user-info span{color:var(--c4);}
+  .top-right{display:flex;gap:10px;align-items:center;}
+  .history-btn{font-family:'Nunito',sans-serif;font-weight:700;font-size:0.8rem;padding:6px 14px;border:1px solid rgba(162,155,254,0.4);border-radius:20px;background:transparent;color:var(--c6);cursor:pointer;transition:all 0.2s;}
+  .history-btn:hover{background:rgba(162,155,254,0.15);}
   .logout-btn{font-family:'Nunito',sans-serif;font-weight:700;font-size:0.8rem;padding:6px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;transition:all 0.2s;}
   .logout-btn:hover{border-color:var(--c5);color:var(--c5);}
   .sync-bar{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.8rem;color:var(--text2);margin-bottom:16px;font-weight:700;}
@@ -85,12 +50,7 @@
   .sync-dot.err{background:var(--c5);}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
   .header{text-align:center;margin-bottom:32px;}
-  .header h1{
-    font-family:'Fredoka One',cursive;font-size:clamp(2rem,6vw,3.2rem);
-    background:linear-gradient(135deg,var(--c1),var(--c3),var(--c4));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-    animation:titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1);
-  }
+  .header h1{font-family:'Fredoka One',cursive;font-size:clamp(2rem,6vw,3.2rem);background:linear-gradient(135deg,var(--c1),var(--c3),var(--c4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1);}
   @keyframes titlePop{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
   .header .subtitle{font-size:1rem;color:var(--text2);margin-top:6px;font-weight:600;}
   .top-bar{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:14px 24px;margin-bottom:28px;backdrop-filter:blur(10px);gap:16px;flex-wrap:wrap;}
@@ -101,8 +61,10 @@
   .streak-count{font-family:'Fredoka One',cursive;font-size:1.8rem;background:linear-gradient(135deg,var(--c2),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .streak-label{font-size:0.85rem;color:var(--text2);font-weight:700;}
   .checkin-btn{font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;padding:10px 20px;border:none;border-radius:50px;cursor:pointer;background:linear-gradient(135deg,var(--c1),var(--c6));color:white;box-shadow:0 4px 20px rgba(255,107,157,0.4);transition:all 0.2s;white-space:nowrap;}
-  .checkin-btn:hover{transform:translateY(-2px);}
+  .checkin-btn:hover:not(:disabled){transform:translateY(-2px);}
   .checkin-btn.done{background:linear-gradient(135deg,var(--c7),#00b894);pointer-events:none;}
+  .checkin-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none !important;}
+  .checkin-hint{font-size:0.75rem;color:var(--c2);font-weight:700;text-align:center;margin-top:4px;width:100%;}
   .progress-wrap{margin-bottom:28px;}
   .progress-meta{display:flex;justify-content:space-between;font-size:0.88rem;font-weight:700;color:var(--text2);margin-bottom:8px;}
   .progress-meta span:last-child{color:var(--c3);}
@@ -111,7 +73,7 @@
   .progress-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4));animation:shimmer 1.5s infinite;}
   @keyframes shimmer{0%,100%{opacity:0.5}50%{opacity:1}}
   .add-section{display:flex;gap:10px;margin-bottom:30px;}
-  .task-input{flex:1;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:600;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px 18px;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+  .task-input{flex:1;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:600;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px 18px;color:var(--text);outline:none;transition:border-color 0.2s;}
   .task-input::placeholder{color:var(--text2);}
   .task-input:focus{border-color:var(--c6);box-shadow:0 0 0 4px rgba(162,155,254,0.2);}
   .add-btn{font-family:'Fredoka One',cursive;font-size:1.1rem;padding:12px 22px;border:none;border-radius:14px;cursor:pointer;background:linear-gradient(135deg,var(--c6),var(--c4));color:white;box-shadow:0 4px 20px rgba(162,155,254,0.35);transition:all 0.2s;white-space:nowrap;}
@@ -150,31 +112,63 @@
   .empty-state{text-align:center;padding:60px 20px;grid-column:1/-1;}
   .empty-state .icon{font-size:4rem;margin-bottom:16px;}
   .empty-state p{color:var(--text2);font-size:1.1rem;font-weight:600;}
-  .calendar-section{margin-top:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:24px;}
-  .section-title{font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:16px;background:linear-gradient(135deg,var(--c3),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-  .cal-grid{display:flex;gap:6px;flex-wrap:wrap;}
-  .cal-day{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;background:rgba(255,255,255,0.06);color:var(--text2);}
-  .cal-day.checked{background:linear-gradient(135deg,var(--c2),var(--c1));color:white;box-shadow:0 2px 10px rgba(255,107,157,0.4);}
-  .cal-day.today{border:2px solid var(--c4);color:var(--c4);}
-  .cal-day.checked.today{border:2px solid var(--c3);}
-  .notif{position:fixed;bottom:24px;right:24px;left:24px;max-width:400px;margin-left:auto;background:linear-gradient(135deg,var(--bg3),var(--bg2));border:2px solid var(--c1);border-radius:20px;padding:16px 20px;z-index:100;animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 8px 32px rgba(255,107,157,0.3);display:flex;align-items:center;gap:12px;}
-  @keyframes slideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
-  .notif-icon{font-size:2rem;}
-  .notif-text strong{display:block;font-size:1rem;color:var(--c1);margin-bottom:2px;}
-  .notif-text span{font-size:0.85rem;color:var(--text2);}
-  .notif-close{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--text2);}
   .all-done{text-align:center;padding:20px;background:linear-gradient(135deg,rgba(85,239,196,0.1),rgba(72,219,251,0.1));border:2px solid var(--c7);border-radius:20px;margin-top:24px;font-family:'Fredoka One',cursive;font-size:1.4rem;animation:bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1);}
   @keyframes bounceIn{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
   .emoji-picker{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
   .emoji-opt{font-size:1.4rem;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.2s,background 0.2s;background:transparent;border:2px solid transparent;}
   .emoji-opt:hover{transform:scale(1.3);}
   .emoji-opt.selected{background:rgba(255,255,255,0.12);border-color:var(--c6);}
-  @media(max-width:480px){.tasks-grid{grid-template-columns:repeat(2,1fr);}.add-section{flex-direction:column;}.auth-box{padding:28px 20px;}}
+
+  /* CALENDAR */
+  .calendar-section{margin-top:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:24px;}
+  .section-title{font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:16px;background:linear-gradient(135deg,var(--c3),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .cal-grid{display:flex;gap:6px;flex-wrap:wrap;}
+  .cal-day{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;background:rgba(255,255,255,0.06);color:var(--text2);cursor:pointer;transition:transform 0.15s;}
+  .cal-day:hover{transform:scale(1.15);}
+  .cal-day.checked{background:linear-gradient(135deg,var(--c2),var(--c1));color:white;box-shadow:0 2px 10px rgba(255,107,157,0.4);}
+  .cal-day.today{border:2px solid var(--c4);color:var(--c4);}
+  .cal-day.checked.today{border:2px solid var(--c3);}
+  .cal-day.has-history{position:relative;}
+  .cal-day.has-history::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--c4);}
+
+  /* HISTORY MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s ease;}
+  .modal{background:var(--bg2);border:1px solid rgba(255,255,255,0.12);border-radius:28px;padding:28px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+  @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .modal-title{font-family:'Fredoka One',cursive;font-size:1.4rem;background:linear-gradient(135deg,var(--c4),var(--c6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .modal-close{background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;color:var(--text2);display:flex;align-items:center;justify-content:center;}
+  .modal-close:hover{background:rgba(255,107,107,0.2);color:var(--c5);}
+  .history-day{margin-bottom:20px;padding:16px;background:rgba(255,255,255,0.04);border-radius:16px;border:1px solid rgba(255,255,255,0.06);}
+  .history-day-title{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--c3);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+  .history-badge{font-size:0.75rem;padding:3px 10px;border-radius:20px;font-family:'Nunito',sans-serif;font-weight:800;}
+  .history-badge.all{background:rgba(85,239,196,0.2);color:var(--c7);}
+  .history-badge.partial{background:rgba(255,159,67,0.2);color:var(--c2);}
+  .history-badge.none{background:rgba(255,107,107,0.2);color:var(--c5);}
+  .history-task{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.9rem;font-weight:600;}
+  .history-task:last-child{border-bottom:none;}
+  .history-task.done{color:var(--text2);}
+  .history-task.done .ht-text{text-decoration:line-through;opacity:0.6;}
+  .history-task .ht-emoji{font-size:1.2rem;}
+  .history-empty{text-align:center;padding:40px;color:var(--text2);font-size:0.95rem;font-weight:600;}
+
+  /* DAY DETAIL MODAL */
+  .day-detail-date{font-size:0.85rem;color:var(--text2);font-weight:700;margin-bottom:16px;text-align:center;}
+
+  /* NOTIF */
+  .notif{position:fixed;bottom:24px;right:24px;left:24px;max-width:400px;margin-left:auto;background:linear-gradient(135deg,var(--bg3),var(--bg2));border:2px solid var(--c1);border-radius:20px;padding:16px 20px;z-index:100;animation:slideUpNotif 0.4s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 8px 32px rgba(255,107,157,0.3);display:flex;align-items:center;gap:12px;}
+  @keyframes slideUpNotif{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
+  .notif-icon{font-size:2rem;}
+  .notif-text strong{display:block;font-size:1rem;color:var(--c1);margin-bottom:2px;}
+  .notif-text span{font-size:0.85rem;color:var(--text2);}
+  .notif-close{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--text2);}
+
+  @media(max-width:480px){.tasks-grid{grid-template-columns:repeat(2,1fr);}.add-section{flex-direction:column;}.auth-box{padding:28px 20px;}.modal{padding:20px;}}
 </style>
 </head>
 <body>
 
-<!-- AUTH PAGE -->
+<!-- AUTH -->
 <div id="authPage">
   <div class="auth-box">
     <div class="auth-title">✨ 任务板</div>
@@ -184,29 +178,23 @@
       <button class="auth-tab" onclick="switchTab('register')">注册</button>
     </div>
     <div id="authMsg"></div>
-    <div class="auth-field">
-      <label>📧 邮箱</label>
-      <input class="auth-input" id="authEmail" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')authSubmit()"/>
-    </div>
-    <div class="auth-field">
-      <label>🔒 密码</label>
-      <input class="auth-input" id="authPassword" type="password" placeholder="至少6位" onkeydown="if(event.key==='Enter')authSubmit()"/>
-    </div>
+    <div class="auth-field"><label>📧 邮箱</label><input class="auth-input" id="authEmail" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')authSubmit()"/></div>
+    <div class="auth-field"><label>🔒 密码</label><input class="auth-input" id="authPassword" type="password" placeholder="至少6位" onkeydown="if(event.key==='Enter')authSubmit()"/></div>
     <button class="auth-btn" id="authBtn" onclick="authSubmit()">登录</button>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="appPage">
   <div class="container">
     <div class="top-actions">
       <div class="user-info">👤 <span id="userEmail"></span></div>
-      <button class="logout-btn" onclick="doLogout()">退出登录</button>
+      <div class="top-right">
+        <button class="history-btn" onclick="openHistory()">📖 历史记录</button>
+        <button class="logout-btn" onclick="doLogout()">退出</button>
+      </div>
     </div>
-    <div class="sync-bar">
-      <div class="sync-dot loading" id="syncDot"></div>
-      <span id="syncLabel">连接中…</span>
-    </div>
+    <div class="sync-bar"><div class="sync-dot loading" id="syncDot"></div><span id="syncLabel">连接中…</span></div>
     <div class="header">
       <h1>✨ 我的每日任务板</h1>
       <p class="subtitle">一步一步来，你已经很棒了 🌈</p>
@@ -218,7 +206,10 @@
         <div class="streak-count" id="streakCount">0</div>
         <div class="streak-label">天连续打卡<br>DAY STREAK</div>
       </div>
-      <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">📅 今日打卡</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">📅 今日打卡</button>
+        <span class="checkin-hint" id="checkinHint" style="display:none"></span>
+      </div>
     </div>
     <div class="progress-wrap">
       <div class="progress-meta"><span>今日进度</span><span id="progressText">0 / 0</span></div>
@@ -230,14 +221,38 @@
       <button class="add-btn" onclick="addTask()">＋ 添加</button>
     </div>
     <div class="tasks-grid" id="tasksGrid"></div>
-    <div class="all-done" id="allDone" style="display:none">🎉 全部完成！你今天太厉害了！<br><span style="font-size:1rem;font-family:'Nunito',sans-serif;font-weight:700;">All tasks done! Amazing!</span></div>
+    <div class="all-done" id="allDone" style="display:none">🎉 全部完成！现在可以打卡了！<br><span style="font-size:1rem;font-family:'Nunito',sans-serif;font-weight:700;">All done! Go check in! 🌈</span></div>
     <div class="calendar-section">
-      <div class="section-title">📅 打卡记录</div>
+      <div class="section-title">📅 打卡记录（点击查看当天详情）</div>
       <div class="cal-grid" id="calGrid"></div>
     </div>
   </div>
 </div>
 
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="historyModal" style="display:none" onclick="closeHistoryIfBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📖 历史记录</div>
+      <button class="modal-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div id="historyContent"></div>
+  </div>
+</div>
+
+<!-- DAY DETAIL MODAL -->
+<div class="modal-overlay" id="dayModal" style="display:none" onclick="closeDayIfBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="dayModalTitle">📋 当日详情</div>
+      <button class="modal-close" onclick="closeDay()">✕</button>
+    </div>
+    <div class="day-detail-date" id="dayModalDate"></div>
+    <div id="dayModalContent"></div>
+  </div>
+</div>
+
+<!-- NOTIF -->
 <div class="notif" id="notif" style="display:none">
   <div class="notif-icon">🦉</div>
   <div class="notif-text"><strong id="notifTitle"></strong><span id="notifMsg"></span></div>
@@ -248,9 +263,9 @@
 const SUPABASE_URL='https://xujqcgwiqitpxtzrsfgi.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1anFjZ3dpcWl0cHh0enJzZmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTAzNTQsImV4cCI6MjA4ODQ2NjM1NH0.HzEC7yG2FYXdtNM8wYd4GfbyNT5M-F4zvkmCfw0H9Nw';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-
 const EMOJIS=['⭐','📚','🏃','🍎','💊','🎮','🎨','🧹','💪','🌿','📝','🛁','🎯','🎵','🧘','🌙'];
 let selectedEmoji='⭐',tasks=[],checkinDates=new Set(),streak=0,colorIndex=0,currentUser=null,currentTab='login';
+let historyCache={};
 
 // AUTH
 function switchTab(tab){
@@ -260,7 +275,6 @@ function switchTab(tab){
   document.getElementById('authMsg').innerHTML='';
 }
 function showAuthMsg(msg,type){document.getElementById('authMsg').innerHTML=`<div class="auth-${type}">${msg}</div>`;}
-
 async function authSubmit(){
   const email=document.getElementById('authEmail').value.trim();
   const password=document.getElementById('authPassword').value;
@@ -275,8 +289,8 @@ async function authSubmit(){
     }else{
       const{data,error}=await sb.auth.signUp({email,password});
       if(error)throw error;
-      if(data.user&&data.session){onLogin(data.user);}
-      else{showAuthMsg('✅ 注册成功！请检查邮箱点击确认链接后登录','success');switchTab('login');}
+      if(data.user&&data.session)onLogin(data.user);
+      else{showAuthMsg('✅ 注册成功！请检查邮箱确认后登录','success');switchTab('login');}
     }
   }catch(e){
     let msg=e.message;
@@ -287,17 +301,15 @@ async function authSubmit(){
   }
   btn.disabled=false;btn.textContent=currentTab==='login'?'登录':'注册账号';
 }
-
 async function doLogout(){
   await sb.auth.signOut();
-  currentUser=null;tasks=[];checkinDates=new Set();streak=0;
+  currentUser=null;tasks=[];checkinDates=new Set();streak=0;historyCache={};
   document.getElementById('appPage').style.display='none';
   document.getElementById('authPage').style.display='flex';
   document.getElementById('authEmail').value='';
   document.getElementById('authPassword').value='';
   document.getElementById('authMsg').innerHTML='';
 }
-
 function onLogin(user){
   currentUser=user;
   document.getElementById('authPage').style.display='none';
@@ -305,7 +317,6 @@ function onLogin(user){
   document.getElementById('userEmail').textContent=user.email;
   renderEmojiPicker();renderDate();loadAll();scheduleReminder();
 }
-
 async function init(){
   const{data:{session}}=await sb.auth.getSession();
   if(session?.user)onLogin(session.user);
@@ -342,6 +353,8 @@ async function loadAll(){
     }else{
       const lastDate=localStorage.getItem('adhd_last_date_'+uid);
       if(lastDate!==today){
+        // Save yesterday's history before resetting
+        if(lastDate) await saveHistory(lastDate, ts);
         await sb.from('tasks').update({done:false}).eq('user_id',uid);
         localStorage.setItem('adhd_last_date_'+uid,today);
         tasks=ts.map(t=>({id:t.id,text:t.text,emoji:t.emoji,color:t.color_idx,done:false}));
@@ -353,8 +366,29 @@ async function loadAll(){
   }catch(e){console.error(e);setSyncStatus('err');}
 }
 
+// SAVE HISTORY
+async function saveHistory(date, taskData){
+  try{
+    const uid=currentUser.id;
+    // Check if history already saved for this date
+    const{data:existing}=await sb.from('task_history').select('id').eq('user_id',uid).eq('date',date).limit(1);
+    if(existing&&existing.length>0)return;
+    const rows=(taskData||tasks).map(t=>({
+      user_id:uid,date,task_id:t.id,task_text:t.text||t.task_text,
+      task_emoji:t.emoji||t.task_emoji,done:t.done
+    }));
+    if(rows.length>0)await sb.from('task_history').insert(rows);
+  }catch(e){console.error('History save error:',e);}
+}
+
 // DATE
 function getToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function formatDate(dateStr){
+  const d=new Date(dateStr+'T00:00:00');
+  const days=['日','一','二','三','四','五','六'];
+  const months=['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+  return `${d.getFullYear()}年${months[d.getMonth()]}月${d.getDate()}日 周${days[d.getDay()]}`;
+}
 function renderDate(){
   const d=new Date(),days=['日','一','二','三','四','五','六'],months=['一','二','三','四','五','六','七','八','九','十','十一','十二'];
   document.getElementById('dateDisplay').innerHTML=`${d.getFullYear()}年${months[d.getMonth()]}月${d.getDate()}日 &nbsp;|&nbsp; 周${days[d.getDay()]}`;
@@ -370,11 +404,20 @@ function calcStreak(){
   return s;
 }
 
-// CHECK-IN
+// CHECK-IN (gated by task completion)
 async function doCheckin(){
-  const today=getToday();if(checkinDates.has(today))return;
+  const today=getToday();
+  if(checkinDates.has(today))return;
+  const total=tasks.length,done=tasks.filter(t=>t.done).length;
+  if(total>0&&done<total){
+    const left=total-done;
+    showNotif('⏳ 还没完成！',`还有 ${left} 个任务没完成，加油！`);
+    return;
+  }
   setSyncStatus('loading');
   try{
+    // Save today's history when checking in
+    await saveHistory(today, tasks);
     await sb.from('checkins').insert({date:today,user_id:currentUser.id});
     checkinDates.add(today);streak=calcStreak();
     document.getElementById('streakCount').textContent=streak;
@@ -383,10 +426,36 @@ async function doCheckin(){
     spawnBursts(['🎊','⭐','🔥','✨']);
   }catch(e){setSyncStatus('err');}
 }
+
 function updateCheckinBtn(){
   const btn=document.getElementById('checkinBtn');
-  if(checkinDates.has(getToday())){btn.textContent='✅ 已打卡 Done!';btn.classList.add('done');}
-  else{btn.textContent='📅 今日打卡';btn.classList.remove('done');}
+  const hint=document.getElementById('checkinHint');
+  const today=getToday();
+  if(checkinDates.has(today)){
+    btn.textContent='✅ 已打卡 Done!';btn.classList.add('done');btn.disabled=false;
+    hint.style.display='none';
+  }else{
+    btn.textContent='📅 今日打卡';btn.classList.remove('done');
+    updateCheckinHint();
+  }
+}
+
+function updateCheckinHint(){
+  const hint=document.getElementById('checkinHint');
+  const btn=document.getElementById('checkinBtn');
+  const today=getToday();
+  if(checkinDates.has(today))return;
+  const total=tasks.length,done=tasks.filter(t=>t.done).length;
+  if(total===0){hint.style.display='none';btn.disabled=false;return;}
+  if(done<total){
+    const left=total-done;
+    hint.textContent=`还差 ${left} 个任务`;
+    hint.style.display='block';
+    btn.disabled=true;
+  }else{
+    hint.style.display='none';
+    btn.disabled=false;
+  }
 }
 
 // TASKS
@@ -410,12 +479,13 @@ async function addTask(){
 async function toggleTask(id){
   const task=tasks.find(t=>t.id===id);if(!task)return;
   task.done=!task.done;renderTasks();updateProgress();
-  if(task.done){spawnBursts(['✨','⭐','🌟']);checkAllDone();}
+  if(task.done)spawnBursts(['✨','⭐','🌟']);
+  checkAllDone();
   try{await sb.from('tasks').update({done:task.done}).eq('id',id).eq('user_id',currentUser.id);setSyncStatus('ok');}catch(e){setSyncStatus('err');}
 }
 
 async function deleteTask(id,e){
-  e.stopPropagation();tasks=tasks.filter(t=>t.id!==id);renderTasks();updateProgress();
+  e.stopPropagation();tasks=tasks.filter(t=>t.id!==id);renderTasks();updateProgress();checkAllDone();
   try{await sb.from('tasks').delete().eq('id',id).eq('user_id',currentUser.id);setSyncStatus('ok');}catch(e){setSyncStatus('err');}
 }
 
@@ -436,11 +506,18 @@ function updateProgress(){
   const total=tasks.length,done=tasks.filter(t=>t.done).length,pct=total?Math.round(done/total*100):0;
   document.getElementById('progressText').textContent=`${done} / ${total}`;
   document.getElementById('progressFill').style.width=pct+'%';
+  updateCheckinHint();
 }
+
 function checkAllDone(){
   if(!tasks.length)return;
-  if(tasks.every(t=>t.done)){document.getElementById('allDone').style.display='block';spawnBursts(['🎉','🏆','🌈','✨','🎊']);setTimeout(()=>showNotif('🏆 全部完成！','今天的任务全部搞定了！太棒了！'),800);}
-  else document.getElementById('allDone').style.display='none';
+  if(tasks.every(t=>t.done)){
+    document.getElementById('allDone').style.display='block';
+    spawnBursts(['🎉','🏆','🌈','✨','🎊']);
+    setTimeout(()=>showNotif('🏆 全部完成！','可以打卡了！点击今日打卡 📅'),800);
+  }else{
+    document.getElementById('allDone').style.display='none';
+  }
 }
 
 // CALENDAR
@@ -449,11 +526,86 @@ function renderCalendar(){
   d.setDate(d.getDate()-27);let html='';
   for(let i=0;i<28;i++){
     const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    html+=`<div class="cal-day${checkinDates.has(key)?' checked':''}${key===today?' today':''}">${d.getDate()}</div>`;
+    const isChecked=checkinDates.has(key),isToday=key===today;
+    html+=`<div class="cal-day${isChecked?' checked':''}${isToday?' today':''} has-history" onclick="openDayDetail('${key}')" title="${key}">${d.getDate()}</div>`;
     d.setDate(d.getDate()+1);
   }
   grid.innerHTML=html;
 }
+
+// DAY DETAIL
+async function openDayDetail(dateStr){
+  document.getElementById('dayModal').style.display='flex';
+  document.getElementById('dayModalTitle').textContent='📋 当日详情';
+  document.getElementById('dayModalDate').textContent=formatDate(dateStr);
+  document.getElementById('dayModalContent').innerHTML='<div style="text-align:center;padding:30px;color:var(--text2)">加载中…</div>';
+  try{
+    const{data}=await sb.from('task_history').select('*').eq('user_id',currentUser.id).eq('date',dateStr).order('task_id');
+    if(!data||data.length===0){
+      const isToday=dateStr===getToday();
+      document.getElementById('dayModalContent').innerHTML=`<div class="history-empty">${isToday?'今天还没有记录，完成任务后打卡会自动保存 😊':'这一天没有找到记录'}</div>`;
+      return;
+    }
+    const done=data.filter(t=>t.done).length,total=data.length;
+    const allDone=done===total,noDone=done===0;
+    const badgeClass=allDone?'all':noDone?'none':'partial';
+    const badgeText=allDone?`全部完成 ${done}/${total}`:noDone?`全部未完成 0/${total}`:`完成 ${done}/${total}`;
+    const isChecked=checkinDates.has(dateStr);
+    document.getElementById('dayModalContent').innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <span class="history-badge ${badgeClass}">${badgeText}</span>
+        <span style="font-size:0.85rem;color:${isChecked?'var(--c7)':'var(--c5)'};font-weight:700;">${isChecked?'✅ 已打卡':'❌ 未打卡'}</span>
+      </div>
+      ${data.map(t=>`
+        <div class="history-task ${t.done?'done':''}">
+          <span class="ht-emoji">${t.task_emoji||'📝'}</span>
+          <span class="ht-text">${escHtml(t.task_text||'')}</span>
+          <span style="margin-left:auto">${t.done?'✅':'⬜'}</span>
+        </div>`).join('')}`;
+  }catch(e){document.getElementById('dayModalContent').innerHTML='<div class="history-empty">加载失败，请重试</div>';}
+}
+function closeDay(){document.getElementById('dayModal').style.display='none';}
+function closeDayIfBg(e){if(e.target===document.getElementById('dayModal'))closeDay();}
+
+// HISTORY PAGE
+async function openHistory(){
+  document.getElementById('historyModal').style.display='flex';
+  document.getElementById('historyContent').innerHTML='<div style="text-align:center;padding:40px;color:var(--text2)">加载中…</div>';
+  try{
+    const{data}=await sb.from('task_history').select('*').eq('user_id',currentUser.id).order('date',{ascending:false}).order('task_id');
+    if(!data||data.length===0){
+      document.getElementById('historyContent').innerHTML='<div class="history-empty">🌱 还没有历史记录<br>完成今天的任务并打卡后会自动保存！</div>';
+      return;
+    }
+    // Group by date
+    const byDate={};
+    data.forEach(t=>{if(!byDate[t.date])byDate[t.date]=[];byDate[t.date].push(t);});
+    let html='';
+    Object.keys(byDate).forEach(date=>{
+      const dayTasks=byDate[date];
+      const done=dayTasks.filter(t=>t.done).length,total=dayTasks.length;
+      const allDone=done===total,noDone=done===0;
+      const badgeClass=allDone?'all':noDone?'none':'partial';
+      const badgeText=allDone?'全部完成':noDone?'全部未完成':`${done}/${total} 完成`;
+      const isChecked=checkinDates.has(date);
+      html+=`<div class="history-day">
+        <div class="history-day-title">
+          <span>${formatDate(date)}</span>
+          <span class="history-badge ${badgeClass}">${badgeText} ${isChecked?'✅':''}</span>
+        </div>
+        ${dayTasks.map(t=>`
+          <div class="history-task ${t.done?'done':''}">
+            <span class="ht-emoji">${t.task_emoji||'📝'}</span>
+            <span class="ht-text">${escHtml(t.task_text||'')}</span>
+            <span style="margin-left:auto">${t.done?'✅':'⬜'}</span>
+          </div>`).join('')}
+      </div>`;
+    });
+    document.getElementById('historyContent').innerHTML=html;
+  }catch(e){document.getElementById('historyContent').innerHTML='<div class="history-empty">加载失败，请重试</div>';}
+}
+function closeHistory(){document.getElementById('historyModal').style.display='none';}
+function closeHistoryIfBg(e){if(e.target===document.getElementById('historyModal'))closeHistory();}
 
 // NOTIF
 function showNotif(title,msg){
@@ -479,7 +631,7 @@ function spawnBursts(emojis){
   },i*80);
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNotif();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeNotif();closeHistory();closeDay();}});
 init();
 </script>
 </body>
