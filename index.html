@@ -377,9 +377,13 @@ async function loadAll(){
       if(lastDate!==today){
         // Save yesterday's history before resetting
         if(lastDate) await saveHistory(lastDate, ts);
-        await sb.from('tasks').update({done:false}).eq('user_id',uid);
+        // Delete completed tasks, keep uncompleted ones
+        const completedIds=ts.filter(t=>t.done).map(t=>t.id);
+        if(completedIds.length>0){
+          await sb.from('tasks').delete().in('id',completedIds).eq('user_id',uid);
+        }
         localStorage.setItem('adhd_last_date_'+uid,today);
-        tasks=ts.map(t=>({id:t.id,text:t.text,emoji:t.emoji,color:t.color_idx,done:false}));
+        tasks=ts.filter(t=>!t.done).map(t=>({id:t.id,text:t.text,emoji:t.emoji,color:t.color_idx,done:false}));
       }else{
         tasks=ts.map(t=>({id:t.id,text:t.text,emoji:t.emoji,color:t.color_idx,done:t.done}));
       }
