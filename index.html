@@ -337,7 +337,7 @@ function onLogin(user){
   document.getElementById('authPage').style.display='none';
   document.getElementById('appPage').style.display='block';
   document.getElementById('userEmail').textContent=user.email;
-  renderEmojiPicker();renderDate();loadAll();scheduleReminder();
+  renderEmojiPicker();renderDate();loadAll();scheduleReminder();setTimeout(subscribeToPush, 2000);
 }
 async function init(){
   const{data:{session}}=await sb.auth.getSession();
@@ -688,6 +688,46 @@ function spawnBursts(emojis){
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeNotif();closeHistory();closeDay();}});
 init();
+
+
+// ═══════════════════════════════
+// WEB PUSH SUBSCRIPTION
+// ═══════════════════════════════
+const VAPID_PUBLIC_KEY = 'BHXZkjFQMWCVa7RywFxRi4m_gq3JPZ-CSCZwwgtLNQ3C7099_g8WvQxoiAN2Vf1J7Lfjt2ebiNHNYsq23wODSfc';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function subscribeToPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) { await savePushSubscription(existing); return; }
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    await savePushSubscription(sub);
+    showNotif('🔔 通知已开启！', '每天提醒时间到了会通知你打卡');
+  } catch(e) { console.error('Push subscription error:', e); }
+}
+
+async function savePushSubscription(sub) {
+  if (!currentUser) return;
+  try {
+    await sb.from('push_subscriptions').upsert({
+      user_id: currentUser.id,
+      subscription: sub.toJSON()
+    }, { onConflict: 'user_id' });
+  } catch(e) { console.error('Save subscription error:', e); }
+}
 
 // Register Service Worker
 if('serviceWorker' in navigator){
